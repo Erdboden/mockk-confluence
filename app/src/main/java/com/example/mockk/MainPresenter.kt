@@ -1,6 +1,5 @@
 package com.example.mockk
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -16,10 +15,14 @@ class MainPresenter(
     }
 
     private fun handleInput() {
-        GlobalScope.launch {
+        GlobalScope.launch(contextProvider.UI) {
             val input = view.getUserInput()
-            withContext(contextProvider.IO) { interactor.saveInput(input) }
-            withContext(contextProvider.UI) { view.showInput(input) }
+            try {
+                withContext(contextProvider.IO) { interactor.saveInput(input) }
+                view.showInput(input)
+            } catch (e: Exception) {
+                view.showInput("Invalid $input")
+            }
         }
     }
 }

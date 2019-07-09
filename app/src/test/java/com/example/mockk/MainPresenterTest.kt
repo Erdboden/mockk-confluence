@@ -2,13 +2,12 @@ package com.example.mockk
 
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-open class MainPresenterTest {
+class MainPresenterTest {
     val view = mockk<MainView>(relaxed = true)
     val interactor = mockk<MainInteractor>(relaxed = true)
     val presenter = MainPresenter(view, interactor, TestContextProvider())
@@ -48,5 +47,16 @@ open class MainPresenterTest {
         presenter.onCreate()
 
         verify { view.showInput("") }
+    }
+
+    @Test
+    fun `throws exception on save`() {
+        val input = "bad input"
+        every { view.getUserInput() } returns input
+        coEvery { interactor.saveInput(input) } throws Exception()
+
+        presenter.onCreate()
+
+        verify { view.showInput("Invalid $input") }
     }
 }
